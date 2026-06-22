@@ -80,16 +80,16 @@ class Environment {
     id: 'local',
     name: 'Local (localhost:8080)',
     searchBaseUrl: 'http://localhost:8080',
-    ingestBaseUrl: null,
-    reportMode: ReportMode.searchFallback,
+    ingestBaseUrl: 'http://localhost:8080',  // reporte real persiste en la galería
+    reportMode: ReportMode.directBase64,
   );
 
   static const Environment localAndroid = Environment(
     id: 'local_android',
     name: 'Local (emulador Android 10.0.2.2)',
     searchBaseUrl: 'http://10.0.2.2:8080',
-    ingestBaseUrl: null,
-    reportMode: ReportMode.searchFallback,
+    ingestBaseUrl: 'http://10.0.2.2:8080',
+    reportMode: ReportMode.directBase64,
   );
 
   static const Environment gcp = Environment(
