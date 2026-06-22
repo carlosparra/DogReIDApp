@@ -93,6 +93,30 @@ class _CaptureScreenState extends State<CaptureScreen> {
             ),
             const SizedBox(height: 20),
             ImagePickerGrid(onChanged: (imgs) => setState(() => _images = imgs)),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.lightbulb_outline, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      widget.isReport
+                          ? 'Sube 2–5 fotos del perro en distintos ángulos (frente, lado, cuerpo '
+                              'completo): mejora mucho las coincidencias.'
+                          : 'Sube varias fotos del perro en distintos ángulos para encontrar más '
+                              'coincidencias.',
+                      style: const TextStyle(fontSize: 12.5),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: 24),
             MetadataForm(onChanged: (m) => setState(() => _metadata = m)),
             const SizedBox(height: 28),
