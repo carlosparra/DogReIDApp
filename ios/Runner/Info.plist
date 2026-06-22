@@ -49,5 +49,7 @@
 	<string>DogReID usa la cámara para tomar fotos del perro a reportar o buscar.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>DogReID accede a tus fotos para seleccionar imágenes del perro.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>DogReID usa tu ubicación para centrar el mapa donde viste o perdiste al perro.</string>
 </dict>
 </plist>

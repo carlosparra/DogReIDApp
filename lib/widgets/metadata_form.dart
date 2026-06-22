@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../models/report_metadata.dart';
+import '../screens/map_picker_screen.dart';
 
 /// Formulario de metadata contextual (NB-10). Todo opcional. Notifica cambios
 /// vía [onChanged] construyendo un [ReportMetadata].
@@ -13,17 +15,16 @@ class MetadataForm extends StatefulWidget {
 }
 
 class _MetadataFormState extends State<MetadataForm> {
-  final _lat = TextEditingController();
-  final _lon = TextEditingController();
   final _color = TextEditingController();
   final _collar = TextEditingController();
   final _desc = TextEditingController();
   String? _size;
   DateTime? _date;
+  LatLng? _location; // elegida en el mapa (no se escribe a mano)
 
   @override
   void dispose() {
-    for (final c in [_lat, _lon, _color, _collar, _desc]) {
+    for (final c in [_color, _collar, _desc]) {
       c.dispose();
     }
     super.dispose();
@@ -31,8 +32,8 @@ class _MetadataFormState extends State<MetadataForm> {
 
   void _emit() {
     widget.onChanged(ReportMetadata(
-      latitude: double.tryParse(_lat.text.trim()),
-      longitude: double.tryParse(_lon.text.trim()),
+      latitude: _location?.latitude,
+      longitude: _location?.longitude,
       reportDate: _date == null
           ? null
           : '${_date!.year.toString().padLeft(4, '0')}-${_date!.month.toString().padLeft(2, '0')}-${_date!.day.toString().padLeft(2, '0')}',
@@ -41,6 +42,18 @@ class _MetadataFormState extends State<MetadataForm> {
       collar: _collar.text.trim(),
       description: _desc.text.trim(),
     ));
+  }
+
+  Future<void> _pickLocation() async {
+    final result = await Navigator.of(context).push<LatLng>(
+      MaterialPageRoute(builder: (_) => MapPickerScreen(initial: _location)),
+    );
+    if (result != null) {
+      setState(() {
+        _location = result;
+        _emit();
+      });
+    }
   }
 
   Future<void> _pickDate() async {
@@ -99,26 +112,33 @@ class _MetadataFormState extends State<MetadataForm> {
           onChanged: (_) => _emit(),
         ),
         const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _lat,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
-                decoration: const InputDecoration(labelText: 'Latitud', border: OutlineInputBorder()),
-                onChanged: (_) => _emit(),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: TextField(
-                controller: _lon,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
-                decoration: const InputDecoration(labelText: 'Longitud', border: OutlineInputBorder()),
-                onChanged: (_) => _emit(),
-              ),
-            ),
-          ],
+        // Ubicación: se elige en el mapa (los humanos no saben lat/long exactas).
+        Card(
+          margin: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(color: Theme.of(context).dividerColor),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: ListTile(
+            leading: Icon(Icons.place,
+                color: _location == null ? Colors.grey : Theme.of(context).colorScheme.primary),
+            title: Text(_location == null ? 'Ubicación (tocar para elegir en el mapa)' : 'Ubicación elegida'),
+            subtitle: _location == null
+                ? const Text('Busca y toca el lugar en el mapa')
+                : Text('lat: ${_location!.latitude.toStringAsFixed(5)}, '
+                    'lon: ${_location!.longitude.toStringAsFixed(5)}'),
+            trailing: _location == null
+                ? const Icon(Icons.map)
+                : IconButton(
+                    icon: const Icon(Icons.close),
+                    tooltip: 'Quitar ubicación',
+                    onPressed: () => setState(() {
+                      _location = null;
+                      _emit();
+                    }),
+                  ),
+            onTap: _pickLocation,
+          ),
         ),
         const SizedBox(height: 12),
         OutlinedButton.icon(
