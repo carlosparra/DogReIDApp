@@ -56,9 +56,11 @@ class CandidateCard extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text('${(candidate.finalScore * 100).toStringAsFixed(1)}%',
+                    // La decisión se basa en la similitud VISUAL (NB-13) -> es el dato destacado.
+                    Text('${(candidate.visualScore * 100).toStringAsFixed(1)}%',
                         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color)),
-                    Text('visual ${(candidate.visualScore * 100).toStringAsFixed(0)}%',
+                    const Text('similitud visual', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                    Text('match ${(candidate.finalDogMatchScore * 100).toStringAsFixed(0)}%',
                         style: const TextStyle(fontSize: 11, color: Colors.grey)),
                   ],
                 ),
