@@ -61,6 +61,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
         title: const Text('Ubicación en el mapa'),
       ),
       body: Stack(
+        fit: StackFit.expand, // el mapa DEBE llenar el espacio (si no, queda en blanco)
         children: [
           FlutterMap(
             mapController: _controller,
