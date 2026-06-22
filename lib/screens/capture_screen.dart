@@ -120,14 +120,17 @@ class _CaptureScreenState extends State<CaptureScreen> {
             const SizedBox(height: 24),
             MetadataForm(onChanged: (m) => setState(() => _metadata = m)),
             const SizedBox(height: 28),
-            FilledButton.icon(
-              onPressed: _canSubmit ? _submit : null,
-              icon: _loading
-                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                  : Icon(widget.isReport ? Icons.send : Icons.search),
-              label: Text(_loading
-                  ? 'Procesando… ${_status.isEmpty ? '' : '($_status)'}'
-                  : (widget.isReport ? 'Enviar reporte' : 'Buscar')),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: _canSubmit ? _submit : null,
+                icon: _loading
+                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                    : Icon(widget.isReport ? Icons.send : Icons.search),
+                label: Text(_loading
+                    ? 'Procesando… ${_status.isEmpty ? '' : '($_status)'}'
+                    : (widget.isReport ? 'Enviar reporte' : 'Buscar')),
+              ),
             ),
             const SizedBox(height: 8),
             Center(

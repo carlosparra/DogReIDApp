@@ -45,15 +45,20 @@ class AppTheme {
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
+        // Solo altura mínima; el ancho NO se fuerza (Size.fromHeight da ancho
+        // infinito y rompe el layout dentro de un Row). Para botones de ancho
+        // completo se envuelve en SizedBox(width: double.infinity).
         style: FilledButton.styleFrom(
-          minimumSize: const Size.fromHeight(54),
+          minimumSize: const Size(0, 54),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           textStyle: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size.fromHeight(50),
+          minimumSize: const Size(0, 50),
+          padding: const EdgeInsets.symmetric(horizontal: 18),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           side: BorderSide(color: hairline),
           textStyle: textTheme.titleMedium,

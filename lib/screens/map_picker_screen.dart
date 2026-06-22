@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -67,39 +66,40 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
       body: kIsWeb
           ? _webNotice(context)
           : Stack(
-        fit: StackFit.expand, // el mapa DEBE llenar el espacio (si no, queda en blanco)
         children: [
-          FlutterMap(
-            mapController: _controller,
-            options: MapOptions(
-              initialCenter: center,
-              initialZoom: 13,
-              onTap: (tapPos, point) => setState(() => _selected = point),
-            ),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.carlosparra.dogreidapp',
-                // Proveedor recomendado para WEB (evita tiles en negro en CanvasKit).
-                tileProvider: CancellableNetworkTileProvider(),
+          Positioned.fill(
+            child: FlutterMap(
+              mapController: _controller,
+              options: MapOptions(
+                initialCenter: center,
+                initialZoom: 13,
+                onTap: (tapPos, point) => setState(() => _selected = point),
               ),
-              if (_selected != null)
-                MarkerLayer(markers: [
-                  Marker(
-                    point: _selected!,
-                    width: 44,
-                    height: 44,
-                    alignment: Alignment.topCenter,
-                    child: const Icon(Icons.location_on, color: Colors.red, size: 44),
-                  ),
-                ]),
-            ],
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.carlosparra.dogreidapp',
+                ),
+                if (_selected != null)
+                  MarkerLayer(markers: [
+                    Marker(
+                      point: _selected!,
+                      width: 44,
+                      height: 44,
+                      alignment: Alignment.topCenter,
+                      child: const Icon(Icons.location_on, color: Colors.red, size: 44),
+                    ),
+                  ]),
+              ],
+            ),
           ),
           // Cruz fija al centro: si no tocas un punto, el centro del mapa es la
           // ubicación elegida al Confirmar.
           if (_selected == null)
-            const IgnorePointer(
-              child: Center(child: Icon(Icons.add_location_alt, color: Colors.red, size: 40)),
+            const Positioned.fill(
+              child: IgnorePointer(
+                child: Center(child: Icon(Icons.add_location_alt, color: Colors.red, size: 40)),
+              ),
             ),
           // Hint superior
           Positioned(

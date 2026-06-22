@@ -87,7 +87,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          FilledButton.icon(onPressed: _save, icon: const Icon(Icons.save), label: const Text('Guardar URLs')),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(onPressed: _save, icon: const Icon(Icons.save), label: const Text('Guardar URLs')),
+          ),
           const SizedBox(height: 24),
           const Card(
             child: Padding(
