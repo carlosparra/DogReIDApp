@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../config/app_settings.dart';
 import '../models/candidate.dart';
+import '../screens/candidate_detail_screen.dart';
 
 /// Tarjeta de un candidato (perro) con su score y decisión — la "respuesta"
 /// que recibe el cliente sobre su perro.
@@ -29,7 +30,11 @@ class CandidateCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6),
       clipBehavior: Clip.antiAlias,
-      child: Column(
+      child: InkWell(
+        onTap: () => Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => CandidateDetailScreen(candidate: candidate),
+        )),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (imageUrl != null) _EvidenceImage(url: imageUrl, color: color),
@@ -94,6 +99,7 @@ class CandidateCard extends StatelessWidget {
       ),
         ],
       ),
+      ),
     );
   }
 }
@@ -105,6 +111,33 @@ class _EvidenceImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        _image(context),
+        Positioned(
+          right: 8,
+          bottom: 8,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.black54,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.zoom_in, color: Colors.white, size: 14),
+                SizedBox(width: 4),
+                Text('Ver completa', style: TextStyle(color: Colors.white, fontSize: 11)),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _image(BuildContext context) {
     return Image.network(
       url,
       height: 180,

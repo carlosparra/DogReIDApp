@@ -57,9 +57,21 @@ class Candidate {
   /// servida por el backend en GET /v1/crop. null si no hay evidencia.
   String? evidenceUrl(String baseUrl) {
     if (evidenceCrops.isEmpty) return null;
-    final p = Uri.encodeQueryComponent(evidenceCrops.first);
-    return '$baseUrl/v1/crop?path=$p';
+    return _cropUrl(baseUrl, evidenceCrops.first);
   }
+
+  /// Todas las URLs de evidencia (para ver las imágenes completas al tocar).
+  List<String> evidenceUrls(String baseUrl) =>
+      evidenceCrops.map((c) => _cropUrl(baseUrl, c)).toList();
+
+  String _cropUrl(String baseUrl, String path) =>
+      '$baseUrl/v1/crop?path=${Uri.encodeQueryComponent(path)}';
+
+  /// true si la coincidencia amerita mostrarse / revisión humana: similitud
+  /// visual >= 87% (alta confianza o posible coincidencia). Por debajo es
+  /// `no_confirmed`: no es coincidencia y NO ocupa ayuda humana -> no se muestra.
+  bool get isActionable =>
+      matchDecision == 'found_high_confidence' || matchDecision == 'possible_match_review';
 
   /// Etiqueta legible de la decisión (NB-13) para el usuario.
   String get decisionLabel {
