@@ -4,66 +4,87 @@ import '../config/app_settings.dart';
 import 'capture_screen.dart';
 import 'settings_screen.dart';
 
-/// Pantalla principal: dos acciones grandes (Buscar / Reportar) + Ajustes.
+/// Home minimal premium: hero limpio + dos acciones claras.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('DogReID'),
+        titleSpacing: 20,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: scheme.primary,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.pets, color: Colors.white, size: 18),
+            ),
+            const SizedBox(width: 10),
+            const Text('DogReID'),
+          ],
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings),
+            icon: const Icon(Icons.settings_outlined),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const SettingsScreen()),
             ),
           ),
+          const SizedBox(width: 8),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
           children: [
-            const SizedBox(height: 8),
-            Icon(Icons.pets, size: 72, color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: 12),
-            Text('Encuentra a tu perro',
-                textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 8),
-            const Text(
+            Text('Reencuentra a\ntu compañero',
+                style: theme.textTheme.displaySmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  height: 1.1,
+                  letterSpacing: -0.5,
+                )),
+            const SizedBox(height: 12),
+            Text(
               'Sube de 1 a 5 fotos para buscar coincidencias o reportar un perro '
-              'perdido/encontrado. Recibirás una respuesta con los candidatos.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey),
+              'perdido o encontrado. Recibirás candidatos con evidencia visual.',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: scheme.onSurfaceVariant,
+                height: 1.45,
+              ),
             ),
-            const SizedBox(height: 36),
-            _BigButton(
-              icon: Icons.search,
+            const SizedBox(height: 28),
+            _ActionCard(
+              icon: Icons.search_rounded,
               title: 'Buscar',
               subtitle: 'Tengo fotos de un perro y quiero ver coincidencias',
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const CaptureScreen(isReport: false)),
               ),
             ),
-            const SizedBox(height: 16),
-            _BigButton(
-              icon: Icons.add_a_photo,
+            const SizedBox(height: 14),
+            _ActionCard(
+              icon: Icons.add_a_photo_outlined,
               title: 'Reportar',
               subtitle: 'Registrar un perro perdido o encontrado',
-              filled: true,
+              accent: true,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const CaptureScreen(isReport: true)),
               ),
             ),
-            const Spacer(),
-            ListenableBuilder(
-              listenable: appSettings,
-              builder: (_, __) => Center(
-                child: Text('Backend: ${appSettings.env.name}',
-                    style: const TextStyle(color: Colors.grey, fontSize: 12)),
+            const SizedBox(height: 28),
+            _TrustRow(),
+            const SizedBox(height: 18),
+            Center(
+              child: ListenableBuilder(
+                listenable: appSettings,
+                builder: (_, __) => _BackendChip(name: appSettings.env.name),
               ),
             ),
           ],
@@ -73,50 +94,119 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class _BigButton extends StatelessWidget {
+class _ActionCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
-  final bool filled;
+  final bool accent;
   final VoidCallback onTap;
-  const _BigButton({
+  const _ActionCard({
     required this.icon,
     required this.title,
     required this.subtitle,
     required this.onTap,
-    this.filled = false,
+    this.accent = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final bg = filled ? scheme.primaryContainer : scheme.surfaceContainerHighest;
-    return Material(
-      color: bg,
-      borderRadius: BorderRadius.circular(16),
+    final iconBg = accent ? scheme.primary : scheme.primaryContainer;
+    final iconFg = accent ? Colors.white : scheme.onPrimaryContainer;
+    return Card(
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(18),
           child: Row(
             children: [
-              Icon(icon, size: 36, color: scheme.primary),
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: iconBg,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(icon, color: iconFg, size: 26),
+              ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 4),
-                    Text(subtitle, style: const TextStyle(fontSize: 13, color: Colors.black54)),
+                    Text(title,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 3),
+                    Text(subtitle,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: scheme.onSurfaceVariant, height: 1.3)),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right),
+              const SizedBox(width: 8),
+              Icon(Icons.chevron_right_rounded, color: scheme.onSurfaceVariant),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _TrustRow extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final items = [
+      (Icons.collections_outlined, '1–5 fotos'),
+      (Icons.verified_user_outlined, 'Revisión humana'),
+      (Icons.bolt_outlined, 'Resultados al instante'),
+    ];
+    final scheme = Theme.of(context).colorScheme;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        for (final it in items)
+          Expanded(
+            child: Column(
+              children: [
+                Icon(it.$1, size: 22, color: scheme.primary),
+                const SizedBox(height: 6),
+                Text(it.$2,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: scheme.onSurfaceVariant)),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _BackendChip extends StatelessWidget {
+  final String name;
+  const _BackendChip({required this.name});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.cloud_outlined, size: 14, color: scheme.onSurfaceVariant),
+          const SizedBox(width: 6),
+          Text(name,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: scheme.onSurfaceVariant)),
+        ],
       ),
     );
   }
