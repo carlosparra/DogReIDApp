@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../config/app_settings.dart';
 import '../models/candidate.dart';
 
 /// Tarjeta de un candidato (perro) con su score y decisión — la "respuesta"
@@ -24,14 +25,20 @@ class CandidateCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = _decisionColor(context);
+    final imageUrl = candidate.evidenceUrl(appSettings.env.searchBaseUrl);
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (imageUrl != null) _EvidenceImage(url: imageUrl, color: color),
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
               children: [
                 CircleAvatar(
                   backgroundColor: color.withValues(alpha: 0.15),
@@ -82,6 +89,47 @@ class CandidateCard extends StatelessWidget {
                   _Chip(icon: Icons.event, label: '${candidate.dateDiffDays!.toStringAsFixed(0)} días'),
               ],
             ),
+          ],
+        ),
+      ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EvidenceImage extends StatelessWidget {
+  final String url;
+  final Color color;
+  const _EvidenceImage({required this.url, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.network(
+      url,
+      height: 180,
+      width: double.infinity,
+      fit: BoxFit.cover,
+      loadingBuilder: (context, child, progress) {
+        if (progress == null) return child;
+        return Container(
+          height: 180,
+          color: Colors.black12,
+          alignment: Alignment.center,
+          child: const CircularProgressIndicator(),
+        );
+      },
+      errorBuilder: (context, error, stack) => Container(
+        height: 120,
+        color: Colors.black12,
+        alignment: Alignment.center,
+        child: const Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.pets, size: 36, color: Colors.grey),
+            SizedBox(height: 6),
+            Text('Imagen del candidato no disponible',
+                style: TextStyle(color: Colors.grey, fontSize: 12)),
           ],
         ),
       ),

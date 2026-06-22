@@ -39,10 +39,18 @@ class ResultsScreen extends StatelessWidget {
                   : 'No encontramos perros parecidos en la base. Intenta más tarde o con otra foto.',
             )
           else ...[
-            Text('${candidates.length} candidato(s) — ordenados por confianza',
+            Text(candidates.length == 1
+                ? 'Mejor coincidencia'
+                : 'Top ${candidates.length > 3 ? 3 : candidates.length} coincidencias',
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
-            ...candidates.map((c) => CandidateCard(candidate: c)),
+            ...candidates.take(3).map((c) => CandidateCard(candidate: c)),
+            if (candidates.length > 3)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text('+${candidates.length - 3} candidato(s) adicional(es) con menor coincidencia',
+                    style: const TextStyle(color: Colors.grey, fontSize: 12)),
+              ),
           ],
           const SizedBox(height: 24),
           Center(

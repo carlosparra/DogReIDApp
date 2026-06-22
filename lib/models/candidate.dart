@@ -53,6 +53,14 @@ class Candidate {
     );
   }
 
+  /// URL para mostrar la imagen del candidato (primer crop de evidencia),
+  /// servida por el backend en GET /v1/crop. null si no hay evidencia.
+  String? evidenceUrl(String baseUrl) {
+    if (evidenceCrops.isEmpty) return null;
+    final p = Uri.encodeQueryComponent(evidenceCrops.first);
+    return '$baseUrl/v1/crop?path=$p';
+  }
+
   /// Etiqueta legible de la decisión (NB-13) para el usuario.
   String get decisionLabel {
     switch (matchDecision) {
