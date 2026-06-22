@@ -1,11 +1,13 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:dogreidapp/main.dart';
 
 void main() {
-  testWidgets('Home muestra las acciones Buscar y Reportar', (WidgetTester tester) async {
+  testWidgets('La app arranca mostrando el splash', (WidgetTester tester) async {
     await tester.pumpWidget(const DogReIDApp());
-    expect(find.text('Buscar'), findsWidgets);
-    expect(find.text('Reportar'), findsOneWidget);
+    await tester.pump(); // primera frame del splash
+    // El splash muestra un indicador de carga mientras prepara la app.
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
 }

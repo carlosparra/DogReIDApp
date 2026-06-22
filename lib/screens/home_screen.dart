@@ -26,7 +26,7 @@ class HomeScreen extends StatelessWidget {
               child: const Icon(Icons.pets, color: Colors.white, size: 18),
             ),
             const SizedBox(width: 10),
-            const Text('DogReID'),
+            const Text('PetNavID'),
           ],
         ),
         actions: [

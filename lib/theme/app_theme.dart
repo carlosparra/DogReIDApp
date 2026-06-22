@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 /// Sistema de diseño "Minimal premium": Material 3, acento índigo, tipografía
 /// Plus Jakarta Sans, tarjetas suaves con borde fino y mucho espacio en blanco.
 class AppTheme {
-  static const Color _seed = Color(0xFF6366F1); // índigo
+  static const Color _seed = Color(0xFF1668E3); // azul PetNavID (del logo)
 
   static ThemeData light() => _build(Brightness.light);
   static ThemeData dark() => _build(Brightness.dark);
