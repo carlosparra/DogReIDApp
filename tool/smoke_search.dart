@@ -28,7 +28,14 @@ Future<void> main(List<String> args) async {
     final r = await api.search(
       reportType: reportType,
       images: [PickedImage(bytes: bytes, name: 'query.jpg')],
-      metadata: const ReportMetadata(color: 'brown', size: 'medium'),
+      metadata: const ReportMetadata(
+        color: 'brown',
+        size: 'medium',
+        collar: 'red',
+        latitude: 25.6866,
+        longitude: -100.3161,
+        reportDate: '2026-06-21',
+      ),
     );
 
     stdout.writeln('status: ${r.status}  ·  perro detectado: ${r.anyDogDetected}');
