@@ -68,7 +68,7 @@ class Candidate {
       '$baseUrl/v1/crop?path=${Uri.encodeQueryComponent(path)}';
 
   /// true si la coincidencia amerita mostrarse / revisión humana: similitud
-  /// visual >= 87% (alta confianza o posible coincidencia). Por debajo es
+  /// visual >= 82% (alta confianza o posible coincidencia). Por debajo es
   /// `no_confirmed`: no es coincidencia y NO ocupa ayuda humana -> no se muestra.
   bool get isActionable =>
       matchDecision == 'found_high_confidence' || matchDecision == 'possible_match_review';

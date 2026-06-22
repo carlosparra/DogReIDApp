@@ -14,8 +14,8 @@ class ResultsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final detected = result.anyDogDetected;
-    // Solo se muestran coincidencias >= 87% (alta confianza o revisión).
-    // Las < 87% (no_confirmed) no son coincidencia y no ocupan ayuda humana.
+    // Solo se muestran coincidencias >= 82% (alta confianza o revisión).
+    // Las < 82% (no_confirmed) no son coincidencia y no ocupan ayuda humana.
     final matches = result.candidates.where((c) => c.isActionable).toList();
     final shown = matches.take(3).toList();
     return Scaffold(
@@ -39,9 +39,9 @@ class ResultsScreen extends StatelessWidget {
               icon: Icons.search_off,
               title: 'Sin coincidencias',
               body: wasReport
-                  ? 'Ningún candidato supera el 87% de similitud. Tu reporte quedó registrado; '
+                  ? 'Ningún candidato supera el 82% de similitud. Tu reporte quedó registrado; '
                       'te avisaremos si aparece una coincidencia.'
-                  : 'Ningún candidato supera el 87% de similitud, así que no hay coincidencias '
+                  : 'Ningún candidato supera el 82% de similitud, así que no hay coincidencias '
                       'que confirmar. Intenta más tarde o con otra foto.',
             )
           else ...[
@@ -52,7 +52,7 @@ class ResultsScreen extends StatelessWidget {
             if (matches.length > 3)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
-                child: Text('+${matches.length - 3} coincidencia(s) adicional(es) ≥ 87%',
+                child: Text('+${matches.length - 3} coincidencia(s) adicional(es) ≥ 82%',
                     style: const TextStyle(color: Colors.grey, fontSize: 12)),
               ),
           ],
@@ -82,7 +82,7 @@ class ResultsScreen extends StatelessWidget {
 
 class _StatusBanner extends StatelessWidget {
   final bool detected;
-  final List<Candidate> matches; // ya filtradas a >= 85%
+  final List<Candidate> matches; // ya filtradas a >= 82%
   const _StatusBanner({required this.detected, required this.matches});
 
   @override
@@ -103,11 +103,11 @@ class _StatusBanner extends StatelessWidget {
     } else if (matches.isNotEmpty) {
       color = Colors.orange.shade700;
       icon = Icons.info;
-      text = 'Posible(s) coincidencia(s) entre 87% y 89%: requieren revisión humana.';
+      text = 'Posible(s) coincidencia(s) entre 82% y 89%: requieren revisión humana.';
     } else {
       color = Colors.blueGrey;
       icon = Icons.search_off;
-      text = 'Sin coincidencias ≥87%: no hay nada que confirmar.';
+      text = 'Sin coincidencias ≥82%: no hay nada que confirmar.';
     }
     return Container(
       padding: const EdgeInsets.all(14),
