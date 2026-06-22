@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
@@ -61,7 +62,11 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
       appBar: AppBar(
         title: const Text('Ubicación en el mapa'),
       ),
-      body: Stack(
+      // En Flutter web flutter_map no renderiza bien (objetivo del proyecto es
+      // móvil, donde sí funciona). En web mostramos una nota de preview.
+      body: kIsWeb
+          ? _webNotice(context)
+          : Stack(
         fit: StackFit.expand, // el mapa DEBE llenar el espacio (si no, queda en blanco)
         children: [
           FlutterMap(
@@ -132,13 +137,56 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: FilledButton.icon(
-                  onPressed: () => Navigator.of(context).pop(_selected ?? _controller.camera.center),
+                  onPressed: () => Navigator.of(context).pop(_confirmPoint()),
                   icon: const Icon(Icons.check),
                   label: const Text('Confirmar ubicación'),
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  /// Punto a confirmar: el tocado; si no, el centro del mapa (móvil) o el
+  /// inicial/por defecto (web, donde no hay mapa interactivo).
+  LatLng _confirmPoint() {
+    if (_selected != null) return _selected!;
+    if (kIsWeb) return widget.initial ?? _fallback;
+    return _controller.camera.center;
+  }
+
+  /// Nota para la vista web (el mapa interactivo es para la app móvil).
+  Widget _webNotice(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.map_outlined, size: 56, color: scheme.primary),
+            const SizedBox(height: 16),
+            Text('El mapa interactivo se ve en la app móvil',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Text(
+              'Estás en la vista web (preview). Usa "Mi ubicación" para fijar tu '
+              'posición, o "Confirmar" para continuar.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: scheme.onSurfaceVariant),
+            ),
+            if (_selected != null) ...[
+              const SizedBox(height: 16),
+              Chip(
+                avatar: const Icon(Icons.place, size: 16),
+                label: Text('lat ${_selected!.latitude.toStringAsFixed(5)}, '
+                    'lon ${_selected!.longitude.toStringAsFixed(5)}'),
+              ),
+            ],
+          ],
         ),
       ),
     );
