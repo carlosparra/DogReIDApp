@@ -4,8 +4,11 @@ import '../models/candidate.dart';
 import '../models/report_result.dart';
 import '../widgets/candidate_card.dart';
 
-/// Pantalla de RESPUESTA al cliente: muestra el estado del procesamiento de sus
-/// imágenes y el ranking de perros candidatos (o el motivo si no hay).
+/// Pantalla de RESPUESTA al cliente. Tres niveles de confianza:
+///  - >= 82%  : coincidencias mostradas normalmente (hasta 3).
+///  - 50-81%  : INCIERTO -> se muestra SOLO el más parecido, con aviso honesto
+///              ("podría no ser tu perro"), cuidando la credibilidad.
+///  - < 50%   : no se muestra nada.
 class ResultsScreen extends StatelessWidget {
   final ReportResult result;
   final bool wasReport;
@@ -14,48 +17,66 @@ class ResultsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final detected = result.anyDogDetected;
-    // Solo se muestran coincidencias >= 82% (alta confianza o revisión).
-    // Las < 82% (no_confirmed) no son coincidencia y no ocupan ayuda humana.
-    final matches = result.candidates.where((c) => c.isActionable).toList();
-    final shown = matches.take(3).toList();
+    final confident = result.candidates.where((c) => c.isActionable).toList();
+
+    // Si no hay coincidencia segura, el más parecido de la banda incierta (50-81%).
+    Candidate? tentativeTop;
+    if (confident.isEmpty) {
+      final t = result.candidates.where((c) => c.isTentative).toList()
+        ..sort((a, b) => b.visualScore.compareTo(a.visualScore));
+      if (t.isNotEmpty) tentativeTop = t.first;
+    }
+
     return Scaffold(
       appBar: AppBar(title: Text(wasReport ? 'Respuesta del reporte' : 'Resultados de búsqueda')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _StatusBanner(detected: detected, matches: matches),
+          _StatusBanner(detected: detected, confident: confident, tentative: tentativeTop),
           const SizedBox(height: 16),
           if (!detected)
-            _empty(
-              context,
-              icon: Icons.pets,
-              title: 'No se detectó un perro',
-              body: 'No pudimos detectar un perro en tus imágenes. Intenta con fotos más claras, '
-                  'de cuerpo completo y bien iluminadas.',
-            )
-          else if (matches.isEmpty)
-            _empty(
-              context,
-              icon: Icons.search_off,
-              title: 'Sin coincidencias',
-              body: wasReport
-                  ? 'Ningún candidato supera el 82% de similitud. Tu reporte quedó registrado; '
-                      'te avisaremos si aparece una coincidencia.'
-                  : 'Ningún candidato supera el 82% de similitud, así que no hay coincidencias '
-                      'que confirmar. Intenta más tarde o con otra foto.',
-            )
-          else ...[
-            Text(shown.length == 1 ? 'Mejor coincidencia' : 'Top ${shown.length} coincidencias',
+            _empty(context,
+                icon: Icons.pets,
+                title: 'No se detectó un perro',
+                body: 'No pudimos detectar un perro en tus imágenes. Intenta con fotos más '
+                    'claras, de cuerpo completo y bien iluminadas.')
+          else if (confident.isNotEmpty) ...[
+            Text(confident.length == 1 ? 'Mejor coincidencia' : 'Top ${confident.length > 3 ? 3 : confident.length} coincidencias',
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
-            ...shown.map((c) => CandidateCard(candidate: c)),
-            if (matches.length > 3)
+            ...confident.take(3).map((c) => CandidateCard(candidate: c)),
+            if (confident.length > 3)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
-                child: Text('+${matches.length - 3} coincidencia(s) adicional(es) ≥ 82%',
+                child: Text('+${confident.length - 3} coincidencia(s) adicional(es) ≥ 82%',
                     style: const TextStyle(color: Colors.grey, fontSize: 12)),
               ),
-          ],
+          ] else if (tentativeTop != null) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              margin: const EdgeInsets.only(bottom: 8),
+              decoration: BoxDecoration(
+                color: Colors.amber.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.amber.shade700),
+              ),
+              child: const Text(
+                'No encontramos una coincidencia segura. Te mostramos el perro más '
+                'parecido por si acaso — pero podría NO ser tu perro. Compáralo tú con '
+                'la foto y, si tienes más fotos, repórtalo/búscalo con varias para mejorar.',
+                style: TextStyle(fontSize: 13),
+              ),
+            ),
+            CandidateCard(candidate: tentativeTop),
+          ] else
+            _empty(context,
+                icon: Icons.search_off,
+                title: 'Sin coincidencias',
+                body: wasReport
+                    ? 'No hay un perro parecido (≥50%) en la base. Tu reporte quedó '
+                        'registrado; te avisaremos si aparece una coincidencia.'
+                    : 'No hay un perro lo bastante parecido en la base. Intenta con otra '
+                        'foto o más tarde.'),
           const SizedBox(height: 24),
           Center(
             child: Text('Reporte: ${result.reportId} · estado: ${result.status}',
@@ -82,13 +103,13 @@ class ResultsScreen extends StatelessWidget {
 
 class _StatusBanner extends StatelessWidget {
   final bool detected;
-  final List<Candidate> matches; // ya filtradas a >= 82%
-  const _StatusBanner({required this.detected, required this.matches});
+  final List<Candidate> confident; // >= 82%
+  final Candidate? tentative; // 50-81% (solo el más parecido)
+  const _StatusBanner({required this.detected, required this.confident, this.tentative});
 
   @override
   Widget build(BuildContext context) {
-    final hasHighConfidence =
-        matches.any((c) => c.matchDecision == 'found_high_confidence');
+    final hasHighConfidence = confident.any((c) => c.matchDecision == 'found_high_confidence');
     final Color color;
     final IconData icon;
     final String text;
@@ -100,14 +121,18 @@ class _StatusBanner extends StatelessWidget {
       color = Colors.green.shade600;
       icon = Icons.check_circle;
       text = '¡Coincidencia de alta confianza (≥90%)! Revisa y confirma.';
-    } else if (matches.isNotEmpty) {
+    } else if (confident.isNotEmpty) {
       color = Colors.orange.shade700;
       icon = Icons.info;
       text = 'Posible(s) coincidencia(s) entre 82% y 89%: requieren revisión humana.';
+    } else if (tentative != null) {
+      color = Colors.amber.shade800;
+      icon = Icons.help_outline;
+      text = 'Sin coincidencia segura. Te mostramos el más parecido por si acaso (puede no ser).';
     } else {
       color = Colors.blueGrey;
       icon = Icons.search_off;
-      text = 'Sin coincidencias ≥82%: no hay nada que confirmar.';
+      text = 'Sin coincidencias: no hay nada que confirmar.';
     }
     return Container(
       padding: const EdgeInsets.all(14),

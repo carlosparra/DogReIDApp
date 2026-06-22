@@ -67,11 +67,14 @@ class Candidate {
   String _cropUrl(String baseUrl, String path) =>
       '$baseUrl/v1/crop?path=${Uri.encodeQueryComponent(path)}';
 
-  /// true si la coincidencia amerita mostrarse / revisión humana: similitud
-  /// visual >= 82% (alta confianza o posible coincidencia). Por debajo es
-  /// `no_confirmed`: no es coincidencia y NO ocupa ayuda humana -> no se muestra.
+  /// Coincidencia con confianza suficiente para mostrarse normalmente (>= 82%):
+  /// alta confianza o posible coincidencia (revisión humana).
   bool get isActionable =>
       matchDecision == 'found_high_confidence' || matchDecision == 'possible_match_review';
+
+  /// Banda incierta (50-81%): NO estamos seguros. La app muestra SOLO el más
+  /// parecido, marcado como "podría no ser tu perro" (cuida la credibilidad).
+  bool get isTentative => matchDecision == 'tentative_low_confidence';
 
   /// Etiqueta legible de la decisión (NB-13) para el usuario.
   String get decisionLabel {
@@ -80,8 +83,8 @@ class Candidate {
         return 'Encontrado · alta confianza';
       case 'possible_match_review':
         return 'Posible coincidencia · revisar';
-      case 'weak_match_review':
-        return 'Coincidencia débil · revisar';
+      case 'tentative_low_confidence':
+        return 'Parecido bajo · podría no ser';
       case 'no_confirmed':
         return 'No confirmado';
       default:

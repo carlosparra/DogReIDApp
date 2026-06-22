@@ -16,8 +16,8 @@ class CandidateCard extends StatelessWidget {
         return Colors.green.shade600;
       case 'possible_match_review':
         return Colors.orange.shade700;
-      case 'weak_match_review':
-        return Colors.amber.shade700;
+      case 'tentative_low_confidence':
+        return Colors.amber.shade800;
       default:
         return Colors.grey.shade600;
     }
