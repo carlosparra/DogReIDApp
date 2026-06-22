@@ -59,15 +59,6 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ubicación en el mapa'),
-        actions: [
-          TextButton(
-            onPressed: _selected == null ? null : () => Navigator.of(context).pop(_selected),
-            child: Text('Listo',
-                style: TextStyle(
-                    color: _selected == null ? Colors.white38 : Colors.white,
-                    fontWeight: FontWeight.bold)),
-          ),
-        ],
       ),
       body: Stack(
         children: [
@@ -95,6 +86,12 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                 ]),
             ],
           ),
+          // Cruz fija al centro: si no tocas un punto, el centro del mapa es la
+          // ubicación elegida al Confirmar.
+          if (_selected == null)
+            const IgnorePointer(
+              child: Center(child: Icon(Icons.add_location_alt, color: Colors.red, size: 40)),
+            ),
           // Hint superior
           Positioned(
             top: 12,
@@ -106,7 +103,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                 padding: const EdgeInsets.all(10),
                 child: Text(
                   _selected == null
-                      ? 'Toca en el mapa el lugar donde viste o perdiste al perro.'
+                      ? 'Mueve el mapa para centrar el lugar (o tócalo). Luego pulsa Confirmar.'
                       : 'Punto elegido — lat: ${_selected!.latitude.toStringAsFixed(5)}, '
                           'lon: ${_selected!.longitude.toStringAsFixed(5)}',
                   style: const TextStyle(color: Colors.white, fontSize: 13),
@@ -116,12 +113,29 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _locating ? null : _useMyLocation,
-        icon: _locating
-            ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-            : const Icon(Icons.my_location),
-        label: const Text('Mi ubicación'),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              OutlinedButton.icon(
+                onPressed: _locating ? null : _useMyLocation,
+                icon: _locating
+                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.my_location),
+                label: const Text('Mi ubicación'),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () => Navigator.of(context).pop(_selected ?? _controller.camera.center),
+                  icon: const Icon(Icons.check),
+                  label: const Text('Confirmar ubicación'),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
