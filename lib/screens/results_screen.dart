@@ -19,12 +19,13 @@ class ResultsScreen extends StatelessWidget {
     final detected = result.anyDogDetected;
     final confident = result.candidates.where((c) => c.isActionable).toList();
 
-    // Si no hay coincidencia segura, el más parecido de la banda incierta (50-81%).
+    // Si no hay coincidencia segura (>=82%), SIEMPRE mostramos el más parecido
+    // (top 1), por bajo que sea, marcado como incierto.
     Candidate? tentativeTop;
-    if (confident.isEmpty) {
-      final t = result.candidates.where((c) => c.isTentative).toList()
+    if (confident.isEmpty && result.candidates.isNotEmpty) {
+      final all = [...result.candidates]
         ..sort((a, b) => b.visualScore.compareTo(a.visualScore));
-      if (t.isNotEmpty) tentativeTop = t.first;
+      tentativeTop = all.first;
     }
 
     return Scaffold(
@@ -73,10 +74,9 @@ class ResultsScreen extends StatelessWidget {
                 icon: Icons.search_off,
                 title: 'Sin coincidencias',
                 body: wasReport
-                    ? 'No hay un perro parecido (≥50%) en la base. Tu reporte quedó '
-                        'registrado; te avisaremos si aparece una coincidencia.'
-                    : 'No hay un perro lo bastante parecido en la base. Intenta con otra '
-                        'foto o más tarde.'),
+                    ? 'Aún no hay otros perros en la base para comparar. Tu reporte '
+                        'quedó registrado; te avisaremos si aparece una coincidencia.'
+                    : 'No hay perros en la base para comparar. Intenta más tarde.'),
           const SizedBox(height: 24),
           Center(
             child: Text('Reporte: ${result.reportId} · estado: ${result.status}',
