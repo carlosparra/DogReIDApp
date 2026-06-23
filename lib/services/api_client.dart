@@ -149,7 +149,7 @@ class ApiClient {
     for (var attempt = 0; attempt < maxAttempts; attempt++) {
       await Future.delayed(interval);
       try {
-        final resp = await _http.get(Uri.parse('$ingest/v1/reports/$reportId'));
+        final resp = await _http.get(Uri.parse('$ingest/v1/reports/$reportId'), headers: _ngrok);
         if (resp.statusCode == 200) {
           final r = ReportResult.fromJson(_decodeMap(resp.body));
           onStatus?.call(r.status);
@@ -180,11 +180,15 @@ class ApiClient {
     if (images.length > 5) throw ApiException('Máximo 5 imágenes.');
   }
 
+  // Header para que ngrok (free) no devuelva su página de advertencia.
+  static const Map<String, String> _ngrok = {'ngrok-skip-browser-warning': 'true'};
+
   Future<String> _post(Uri uri, String body) async {
     late http.Response resp;
     try {
       resp = await _http
-          .post(uri, headers: {'Content-Type': 'application/json'}, body: body)
+          .post(uri,
+              headers: {'Content-Type': 'application/json', ..._ngrok}, body: body)
           .timeout(const Duration(seconds: 60));
     } on TimeoutException {
       throw ApiException('Tiempo de espera agotado conectando a $uri.');

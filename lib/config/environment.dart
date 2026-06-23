@@ -92,6 +92,16 @@ class Environment {
     reportMode: ReportMode.directBase64,
   );
 
+  // Backend local expuesto por ngrok (URL pública HTTPS). Edita la URL en
+  // Ajustes con la que te dé `ngrok http 8080`.
+  static const Environment ngrok = Environment(
+    id: 'ngrok',
+    name: 'Remoto (ngrok)',
+    searchBaseUrl: 'https://CAMBIAR.ngrok-free.app',
+    ingestBaseUrl: 'https://CAMBIAR.ngrok-free.app',
+    reportMode: ReportMode.directBase64,
+  );
+
   static const Environment gcp = Environment(
     id: 'gcp',
     name: 'GCP (Cloud Run)',
@@ -101,5 +111,5 @@ class Environment {
     reportMode: ReportMode.signedUrl,
   );
 
-  static const List<Environment> presets = [local, localAndroid, gcp];
+  static const List<Environment> presets = [local, localAndroid, ngrok, gcp];
 }
