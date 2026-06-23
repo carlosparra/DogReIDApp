@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/candidate.dart';
+import '../models/image_result.dart';
 import '../models/report_result.dart';
 import '../widgets/candidate_card.dart';
 
@@ -35,11 +36,7 @@ class ResultsScreen extends StatelessWidget {
           _StatusBanner(detected: detected, confident: confident, tentative: tentativeTop),
           const SizedBox(height: 16),
           if (!detected)
-            _empty(context,
-                icon: Icons.pets,
-                title: 'No se detectó un perro',
-                body: 'No pudimos detectar un perro en tus imágenes. Intenta con fotos más '
-                    'claras, de cuerpo completo y bien iluminadas.')
+            _noDogFeedback(context, _firstNoDogImage())
           else if (confident.isNotEmpty) ...[
             Text(confident.length == 1 ? 'Mejor coincidencia' : 'Top ${confident.length > 3 ? 3 : confident.length} coincidencias',
                 style: Theme.of(context).textTheme.titleMedium),
@@ -85,6 +82,35 @@ class ResultsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Primera imagen sin perro (para el feedback), o la primera si todas fallan.
+  ImageResult? _firstNoDogImage() {
+    for (final i in result.images) {
+      if (!i.dogDetected) return i;
+    }
+    return result.images.isNotEmpty ? result.images.first : null;
+  }
+
+  /// Mensaje según DOS validaciones separadas: (1) calidad de imagen,
+  /// (2) detección de perro (con lo que YOLO sí identificó).
+  Widget _noDogFeedback(BuildContext context, ImageResult? img) {
+    if (img != null && img.hasQualityIssue) {
+      return _empty(context,
+          icon: Icons.image_not_supported_outlined,
+          title: 'Imagen de baja calidad',
+          body: 'La imagen parece ${img.qualityIssueText}. Sube una foto más clara, '
+              'bien iluminada, nítida y de buena resolución, y vuelve a intentar.');
+    }
+    final saw = img?.sawText ?? '';
+    return _empty(context,
+        icon: Icons.pets,
+        title: 'No se detectó un perro',
+        body: saw.isNotEmpty
+            ? 'No identificamos un perro en la foto. Lo que detectamos: $saw. '
+                'Asegúrate de subir una foto de un perro, de cuerpo completo.'
+            : 'No identificamos un perro en la foto. Asegúrate de subir una foto '
+                'de un perro, de cuerpo completo y bien iluminada.');
   }
 
   Widget _empty(BuildContext context, {required IconData icon, required String title, required String body}) {
