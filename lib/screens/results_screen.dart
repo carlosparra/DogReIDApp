@@ -104,22 +104,20 @@ class ResultsScreen extends StatelessWidget {
   /// Mensaje según DOS validaciones separadas: (1) calidad de imagen,
   /// (2) detección de perro (con lo que YOLO sí identificó).
   Widget _noDogFeedback(BuildContext context, ImageResult? img) {
+    final saw = img?.sawText ?? '';
+    final sawPart = saw.isNotEmpty ? ' Lo que detectamos en su lugar: $saw.' : '';
     if (img != null && img.hasQualityIssue) {
       return _empty(context,
           icon: Icons.image_not_supported_outlined,
           title: 'Imagen de baja calidad',
-          body: 'La imagen parece ${img.qualityIssueText}. Sube una foto más clara, '
-              'bien iluminada, nítida y de buena resolución, y vuelve a intentar.');
+          body: 'La imagen parece ${img.qualityIssueText}.$sawPart Sube una foto más '
+              'clara, bien iluminada y nítida, y vuelve a intentar.');
     }
-    final saw = img?.sawText ?? '';
     return _empty(context,
         icon: Icons.pets,
         title: 'No se detectó un perro',
-        body: saw.isNotEmpty
-            ? 'No identificamos un perro en la foto. Lo que detectamos: $saw. '
-                'Asegúrate de subir una foto de un perro, de cuerpo completo.'
-            : 'No identificamos un perro en la foto. Asegúrate de subir una foto '
-                'de un perro, de cuerpo completo y bien iluminada.');
+        body: 'No identificamos un perro en la foto.$sawPart Asegúrate de subir una '
+            'foto de un perro, de cuerpo completo y bien iluminada.');
   }
 
   Widget _empty(BuildContext context, {required IconData icon, required String title, required String body}) {
