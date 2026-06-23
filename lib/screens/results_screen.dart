@@ -75,6 +75,15 @@ class ResultsScreen extends StatelessWidget {
                     : 'Ningún candidato supera el 50% de similitud. Intenta con otra '
                         'foto o más tarde.'),
           const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: () => Navigator.of(context).popUntil((r) => r.isFirst),
+              icon: const Icon(Icons.check),
+              label: Text(wasReport ? 'Aceptar' : 'Volver al inicio'),
+            ),
+          ),
+          const SizedBox(height: 16),
           Center(
             child: Text('Reporte: ${result.reportId} · estado: ${result.status}',
                 style: const TextStyle(color: Colors.grey, fontSize: 12)),
