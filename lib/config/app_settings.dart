@@ -5,7 +5,7 @@ import 'environment.dart';
 /// Estado global mínimo: el entorno seleccionado (local/GCP) y su edición en vivo.
 /// Sin dependencias externas de estado — un simple [ValueNotifier].
 class AppSettings extends ChangeNotifier {
-  Environment _env = Environment.local;
+  Environment _env = Environment.ngrok; // por defecto remoto (funciona en teléfono)
   Environment get env => _env;
 
   /// Lista editable de entornos (arranca con los presets).

@@ -94,11 +94,12 @@ class Environment {
 
   // Backend local expuesto por ngrok (URL pública HTTPS). Edita la URL en
   // Ajustes con la que te dé `ngrok http 8080`.
+  static const String _ngrokUrl = 'https://unintermitted-culmicolous-rona.ngrok-free.dev';
   static const Environment ngrok = Environment(
     id: 'ngrok',
     name: 'Remoto (ngrok)',
-    searchBaseUrl: 'https://CAMBIAR.ngrok-free.app',
-    ingestBaseUrl: 'https://CAMBIAR.ngrok-free.app',
+    searchBaseUrl: _ngrokUrl,
+    ingestBaseUrl: _ngrokUrl,
     reportMode: ReportMode.directBase64,
   );
 
